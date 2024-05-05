@@ -1,9 +1,10 @@
 from bs4 import BeautifulSoup
 import requests
 import json
-import mysql.connector
-import db
+from db import *
 import os
+
+
 ######################## Extract recipe info
 
 def extract_name(soup):
@@ -130,69 +131,6 @@ def extract_recipe_links(html_content):
                 recipe_links.append((name, href))
     return recipe_links
 
-
-################### Database operations
-
-def insert_recipe(connection, recipe_info):
-    try:
-        cursor = connection.cursor()
-        
-        # Check if the recipe already exists in the database
-        query = "SELECT recipe_id FROM recipes WHERE name = %s"
-        cursor.execute(query, (recipe_info['name'],))
-        existing_recipe = cursor.fetchone()
-        
-        if existing_recipe:
-            print("Recipe already exists in the database")
-            return
-        else:
-            # Insert the recipe into the recipes table
-            query = """
-                INSERT INTO recipes (name, ingredients_list, method_parts, prep_time, cook_time, servings, image_url, source_url)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-            """
-            values = (
-                recipe_info['name'],
-                recipe_info['ingredients'],
-                recipe_info['method_parts'],
-                recipe_info['prep_time'],
-                recipe_info['cook_time'],
-                recipe_info['servings'],
-                recipe_info['image_url'],
-                recipe_info['source_url']
-            )
-            cursor.execute(query, values)
-            connection.commit()
-            print("Recipe inserted successfully")
-            recipe_id = cursor.lastrowid
-
-        # Insert tags into the tags table and associate them with the recipe in the recipe_tags table
-        if 'tags' in recipe_info:
-            tags = json.loads(recipe_info['tags'])
-            for tag in tags:
-                # Insert the tag if it doesn't exist
-                query = "INSERT IGNORE INTO tags (tag_name) VALUES (%s)"
-                cursor.execute(query, (tag,))
-                connection.commit()
-
-                # Get the tag_id
-                query = "SELECT tag_id FROM tags WHERE tag_name = %s"
-                cursor.execute(query, (tag,))
-                tag_id = cursor.fetchone()[0]
-
-                # Associate the tag with the recipe in the recipe_tags table
-                query = "INSERT INTO recipe_tags (recipe_id, tag_id) VALUES (%s, %s)"
-                cursor.execute(query, (recipe_id, tag_id))
-                connection.commit()
-
-            print("Tags inserted and associated successfully")
-    except mysql.connector.Error as e:
-        print(f"Error inserting recipe into database: {e}")
-    finally:
-        if connection.is_connected():
-            cursor.close()
-
-
 # Function to load existing links from a file
 def load_links_from_file(file_path):
     if os.path.exists(file_path):
@@ -208,29 +146,17 @@ def append_links_to_file(file_path, links):
             file.write(f"{link}\n")
 
 
-# Main function to run the scraping and database operations
-if __name__ == "__main__":
+# Function to update the database with new recipes
+def update_database(connection, recipes):
+    for _, link in recipes:
+        url_request = requests.get(link)
+        html_content = url_request.content.decode('utf-8')
+        recipe_info = extract_recipe_info(html_content)
+        recipe_info['source_url'] = link
+        insert_recipe(connection, recipe_info)
 
-    # Replace these with your actual database connection details
-    HOST = 'localhost'
-    USER = 'root'
-    PORT = '3306'
-    PASSWORD = 'root'
-    DATABASE = 'spicesync'
-
-    # Connect to MySQL database
-    connection = db.connect_to_mysql(HOST, USER, PASSWORD, DATABASE)
-
-    if not connection:
-        print("Error connecting to the database")
-        exit()
-
-    ### insert a single recipe for testing
-    # BASE_URL = 'https://based.cooking/kombucha/'
-    # url_request = requests.get(BASE_URL)
-    # html_content = url_request.content.decode('utf-8')
-    # recipe_info = extract_recipe_info(html_content)
-
+# Function to scrape the site and update the database
+def scrape_and_update_database(connection, use_existing_links=False):
     # Extract recipe links
     BASE_URL = 'https://based.cooking/'
     url_request = requests.get(BASE_URL)
@@ -245,16 +171,28 @@ if __name__ == "__main__":
     # Filter out existing links
     new_recipes = [(name, link) for name, link in recipes if link not in existing_links]
 
+    # In case we want to use existing links
+    if use_existing_links:
+        new_recipes = recipes
 
-    
-    # Process each recipe
-    for name, link in new_recipes:
-        url_request = requests.get(link)
-        html_content = url_request.content.decode('utf-8')
-        recipe_info = extract_recipe_info(html_content)
-        recipe_info['source_url'] = link
-        print('Found:', name)
-        insert_recipe(connection, recipe_info)
-
+    # Update the database with new recipes
+    update_database(connection, new_recipes)
     append_links_to_file(file_path, [link for name, link in new_recipes])
+
+
+
+if __name__ == "__main__":
+
+    # Replace these with your actual database connection details
+    HOST = 'localhost'
+    USER = 'root'
+    PORT = '3306'
+    PASSWORD = 'root'
+    DATABASE = 'spicesync'
+
+    # Connect to MySQL database
+    connection = connect_to_mysql(HOST, USER, PASSWORD, DATABASE)
+
+    scrape_and_update_database(connection)
+
     connection.close()
