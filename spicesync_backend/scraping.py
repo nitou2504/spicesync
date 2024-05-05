@@ -1,8 +1,9 @@
 from bs4 import BeautifulSoup
 import requests
 import json
-from db import *
 import os
+from db import *
+import secrets
 
 
 ######################## Extract recipe info
@@ -183,12 +184,12 @@ def scrape_and_update_database(connection, use_existing_links=False):
 
 if __name__ == "__main__":
 
-    # Replace these with your actual database connection details
-    HOST = 'localhost'
-    USER = 'root'
-    PORT = '3306'
-    PASSWORD = 'root'
-    DATABASE = 'spicesync'
+
+    HOST = secrets.HOST
+    USER = secrets.USER
+    PORT = secrets.PORT
+    PASSWORD = secrets.PASSWORD
+    DATABASE = secrets.DATABASE
 
     # Connect to MySQL database
     connection = connect_to_mysql(HOST, USER, PASSWORD, DATABASE)
