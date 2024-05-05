@@ -2,7 +2,8 @@ from bs4 import BeautifulSoup
 import requests
 import json
 import mysql.connector
-
+import db
+import os
 ######################## Extract recipe info
 
 def extract_name(soup):
@@ -131,20 +132,6 @@ def extract_recipe_links(html_content):
 
 
 ################### Database operations
-def connect_to_mysql(host, user, password, database, port='3306'):
-    try:
-        connection = mysql.connector.connect(
-            host=host,
-            user=user,
-            password=password,
-            database=database,
-            port=port
-        )
-        print("Connected to MySQL database")
-        return connection
-    except mysql.connector.Error as e:
-        print(f"Error connecting to MySQL database: {e}")
-        return None
 
 def insert_recipe(connection, recipe_info):
     try:
@@ -205,6 +192,22 @@ def insert_recipe(connection, recipe_info):
         if connection.is_connected():
             cursor.close()
 
+
+# Function to load existing links from a file
+def load_links_from_file(file_path):
+    if os.path.exists(file_path):
+        with open(file_path, 'r') as file:
+            return file.read().splitlines()
+    else:
+        return []
+
+# Function to append new links to a file
+def append_links_to_file(file_path, links):
+    with open(file_path, 'a') as file:
+        for link in links:
+            file.write(f"{link}\n")
+
+
 # Main function to run the scraping and database operations
 if __name__ == "__main__":
 
@@ -216,7 +219,7 @@ if __name__ == "__main__":
     DATABASE = 'spicesync'
 
     # Connect to MySQL database
-    connection = connect_to_mysql(HOST, USER, PASSWORD, DATABASE)
+    connection = db.connect_to_mysql(HOST, USER, PASSWORD, DATABASE)
 
     if not connection:
         print("Error connecting to the database")
@@ -234,9 +237,18 @@ if __name__ == "__main__":
     html_content = url_request.content.decode('utf-8')
     recipes = extract_recipe_links(html_content)
 
+    # Get the directory of the current script
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    file_path = os.path.join(dir_path, 'links.txt')
+    existing_links = load_links_from_file(file_path)
+    
+    # Filter out existing links
+    new_recipes = [(name, link) for name, link in recipes if link not in existing_links]
+
+
     
     # Process each recipe
-    for name, link in recipes:
+    for name, link in new_recipes:
         url_request = requests.get(link)
         html_content = url_request.content.decode('utf-8')
         recipe_info = extract_recipe_info(html_content)
@@ -244,4 +256,5 @@ if __name__ == "__main__":
         print('Found:', name)
         insert_recipe(connection, recipe_info)
 
+    append_links_to_file(file_path, [link for name, link in new_recipes])
     connection.close()
