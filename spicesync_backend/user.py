@@ -58,3 +58,42 @@ def login_user(connection, login_credentials):
     finally:
         if connection.is_connected():
             cursor.close()
+
+
+def update_user(connection, user_id, user_data):
+    try:
+        cursor = connection.cursor(dictionary=True)
+
+        # Check if user exists
+        query = "SELECT * FROM users WHERE user_id = %s"
+        cursor.execute(query, (user_id,))
+        existing_user = cursor.fetchone()
+
+        if existing_user:
+            # Update user data
+            query = """
+                UPDATE users 
+                SET email = %s, username = %s, phone_number = %s, password = %s 
+                WHERE user_id = %s
+                """
+            values = (
+                user_data.get('email', existing_user['email']),
+                user_data.get('username', existing_user['username']),
+                user_data.get('phone_number', existing_user['phone_number']),
+                user_data.get('password', existing_user['password']),
+                user_id
+            )
+            cursor.execute(query, values)
+            connection.commit()
+            print(f"User with ID {user_id} updated successfully")
+            return user_data
+        else:
+            print(f"User with ID {user_id} does not exist")
+            return None
+
+    except mysql.connector.Error as e:
+        print(f"Error updating user in database: {e}")
+        return None
+    finally:
+        if connection.is_connected():
+            cursor.close()

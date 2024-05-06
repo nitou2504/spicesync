@@ -12,6 +12,8 @@ PORT = db_config.PORT
 PASSWORD = db_config.PASSWORD
 DATABASE = db_config.DATABASE
 
+
+
 # Route to register a new user
 @app.route('/register', methods=['POST'])
 def register_user():
@@ -42,6 +44,21 @@ def login_user():
     else:
         return jsonify({"message": "Invalid email or password"}), 401
 
+
+# Route to update user profile
+@app.route('/update_user/<int:user_id>', methods=['PUT'])
+def update_user_route(user_id):
+    connection = connect_to_mysql(HOST, USER, PASSWORD, DATABASE)
+    user_data = request.get_json()
+    updated_user = user.update_user(connection, user_id, user_data)
+    connection.close()
+
+    if updated_user:
+        return jsonify({"message": "User updated successfully", "user": updated_user}), 200
+    else:
+        return jsonify({"message": f"Failed to update user with ID {user_id}"}), 404
+
+
 # # Route to get recipes by category
 # @app.route('/recipes/category/<string:category>', methods=['GET'])
 # def get_recipes_by_category(category):
@@ -70,11 +87,6 @@ def scrape_recipes():
     # Logic to scrape recipes
     return jsonify({'message': 'Recipes scraped successfully'})
 
-# Route to update user profile
-@app.route('/profile', methods=['PUT'])
-def update_profile():
-    # Logic to update user profile
-    return jsonify({'message': 'User profile updated successfully'})
 
 # Route to get ingredient list of a recipe
 @app.route('/recipes/<int:recipe_id>/ingredients', methods=['GET'])
