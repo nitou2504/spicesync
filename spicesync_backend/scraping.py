@@ -3,7 +3,7 @@ import requests
 import json
 import os
 from db import *
-import secrets
+import db_config
 from utils import *
 
 ######################## Extract recipe info
@@ -243,11 +243,11 @@ def scrape_and_update_database(connection, use_existing_links=False):
 if __name__ == "__main__":
 
 
-    HOST = secrets.HOST
-    USER = secrets.USER
-    PORT = secrets.PORT
-    PASSWORD = secrets.PASSWORD
-    DATABASE = secrets.DATABASE
+    HOST = db_config.HOST
+    USER = db_config.USER
+    PORT = db_config.PORT
+    PASSWORD = db_config.PASSWORD
+    DATABASE = db_config.DATABASE
 
     # Connect to MySQL database
     connection = connect_to_mysql(HOST, USER, PASSWORD, DATABASE)

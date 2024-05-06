@@ -1,16 +1,16 @@
 from flask import Flask, jsonify, request
 from scraping import scrape_and_update_database
 from db import connect_to_mysql
-import secrets
+import db_config
 
 app = Flask(__name__)
 
 # Database connection details
-HOST = secrets.HOST
-USER = secrets.USER
-PORT = secrets.PORT
-PASSWORD = secrets.PASSWORD
-DATABASE = secrets.DATABASE
+HOST = db_config.HOST
+USER = db_config.USER
+PORT = db_config.PORT
+PASSWORD = db_config.PASSWORD
+DATABASE = db_config.DATABASE
 
 # Route to register a new user
 @app.route('/register', methods=['POST'])
@@ -89,4 +89,4 @@ def make_comment(recipe_id):
     return jsonify({'message': 'Comment added successfully'})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=2525) # Run the Flask api on port 2525
