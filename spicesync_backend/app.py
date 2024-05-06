@@ -13,6 +13,7 @@ PASSWORD = db_config.PASSWORD
 DATABASE = db_config.DATABASE
 
 
+###### Users ######
 
 # Route to register a new user
 @app.route('/register', methods=['POST'])
@@ -59,6 +60,19 @@ def update_user_route(user_id):
         return jsonify({"message": f"Failed to update user with ID {user_id}"}), 404
 
 
+# Route to get user profile
+@app.route('/user_profile/<int:user_id>', methods=['GET'])
+def get_user_profile_route(user_id):
+    connection = connect_to_mysql(HOST, USER, PASSWORD, DATABASE)
+    user_profile = user.get_user_profile(connection, user_id)
+    connection.close()
+
+    if user_profile:
+        return jsonify(user_profile), 200
+    else:
+        return jsonify({"message": "User not found"}), 404
+    
+
 # # Route to get recipes by category
 # @app.route('/recipes/category/<string:category>', methods=['GET'])
 # def get_recipes_by_category(category):
@@ -78,6 +92,51 @@ def update_user_route(user_id):
 #     # Logic to search recipes by name
 #     return jsonify({'query': query, 'recipes': recipes})
 
+# Route to get user favorite recipes
+# @app.route('/user/<int:user_id>/favorites', methods=['GET'])
+# def get_user_favorites(user_id):
+#     connection = connect_to_mysql(HOST, USER, PASSWORD, DATABASE)
+#     favorites = user.get_user_favorites(connection, user_id)
+#     connection.close()
+
+#     return jsonify({"user_id": user_id, "favorites": favorites})
+
+# Route to add recipe to user favorites
+# @app.route('/user/<int:user_id>/favorites', methods=['POST'])
+# def add_to_favorites(user_id):
+#     connection = connect_to_mysql(HOST, USER, PASSWORD, DATABASE)
+#     recipe_id = request.get_json()['recipe_id']
+#     user.add_to_favorites(connection, user_id, recipe_id)
+#     connection.close()
+
+#     return jsonify({"message": "Recipe added to favorites successfully"})
+
+# Route to remove recipe from user favorites
+# @app.route('/user/<int:user_id>/favorites', methods=['DELETE'])
+# def remove_from_favorites(user_id):
+#     connection = connect_to_mysql(HOST, USER, PASSWORD, DATABASE)
+#     recipe_id = request.get_json()['recipe_id']
+#     user.remove_from_favorites(connection, user_id, recipe_id)
+#     connection.close()
+
+#     return jsonify({"message": "Recipe removed from favorites successfully"})
+
+# Route to get user read recipes
+# @app.route('/user/<int:user_id>/read', methods=['GET'])
+# def get_user_read(user_id):
+#     connection = connect_to_mysql(HOST, USER, PASSWORD, DATABASE)
+#     read = user.get_user_read(connection, user_id)
+#     connection.close()
+
+#     return jsonify({"user_id": user_id, "read": read})
+
+# Route to mark recipe as read
+@app.route('/recipes/<int:recipe_id>/read', methods=['POST'])
+def mark_recipe_as_read(recipe_id):
+    # Logic to mark recipe as read
+    return jsonify({'message': 'Recipe marked as read successfully'})
+
+
 # Route to scrape recipes
 @app.route('/scrape', methods=['POST'])
 def scrape_recipes():
@@ -88,23 +147,9 @@ def scrape_recipes():
     return jsonify({'message': 'Recipes scraped successfully'})
 
 
-# Route to get ingredient list of a recipe
-@app.route('/recipes/<int:recipe_id>/ingredients', methods=['GET'])
-def get_ingredient_list(recipe_id):
-    # Logic to retrieve ingredient list of a recipe
-    return jsonify({'recipe_id': recipe_id, 'ingredients': []})
 
-# Route to update ingredient list of a recipe
-@app.route('/recipes/<int:recipe_id>/ingredients', methods=['PUT'])
-def update_ingredient_list(recipe_id):
-    # Logic to update ingredient list of a recipe
-    return jsonify({'message': 'Ingredient list updated successfully'})
 
-# Route to mark recipe as read
-@app.route('/recipes/<int:recipe_id>/read', methods=['POST'])
-def mark_recipe_as_read(recipe_id):
-    # Logic to mark recipe as read
-    return jsonify({'message': 'Recipe marked as read successfully'})
+###### Comments ######
 
 # Route to get comments on a recipe
 @app.route('/recipes/<int:recipe_id>/comments', methods=['GET'])

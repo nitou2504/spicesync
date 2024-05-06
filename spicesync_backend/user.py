@@ -97,3 +97,13 @@ def update_user(connection, user_id, user_data):
     finally:
         if connection.is_connected():
             cursor.close()
+
+def get_user_profile(connection, user_id):
+    cursor = connection.cursor(dictionary=True)
+
+    # Fetch user data
+    cursor.execute("SELECT * FROM users WHERE user_id = %s", (user_id,))
+    user_profile = cursor.fetchone()
+
+    cursor.close()
+    return user_profile
