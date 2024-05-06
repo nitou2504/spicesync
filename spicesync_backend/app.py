@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request
 from scraping import scrape_and_update_database
 from db import connect_to_mysql
 import db_config
-
+import user
 app = Flask(__name__)
 
 # Database connection details
@@ -16,13 +16,31 @@ DATABASE = db_config.DATABASE
 @app.route('/register', methods=['POST'])
 def register_user():
     # Logic to register a new user
-    return jsonify({'message': 'User registered successfully'})
+    connection = connect_to_mysql(HOST, USER, PASSWORD, DATABASE)
+    user_json = request.get_json()
+    user_ = user.create_user(connection, user_json)
+    connection.close()
+    if user_ is None:
+        return jsonify({"message": "User already exists"}), 400
+    else:
+        return jsonify({"message": "User created successfully"}), 201
 
+    
 # Route to log in
 @app.route('/login', methods=['POST'])
 def login_user():
-    # Logic to authenticate user
-    return jsonify({'message': 'User logged in successfully'})
+    connection = connect_to_mysql(HOST, USER, PASSWORD, DATABASE)  # Establish MySQL connection
+    login_credentials = request.get_json()  # Get login credentials from request
+
+    # Call the login_user function from user module
+    user_id = user.login_user(connection, login_credentials)
+
+    connection.close()  # Close MySQL connection
+
+    if user_id:
+        return jsonify({"message": "Login successful", "user_id": user_id}), 200
+    else:
+        return jsonify({"message": "Invalid email or password"}), 401
 
 # # Route to get recipes by category
 # @app.route('/recipes/category/<string:category>', methods=['GET'])
