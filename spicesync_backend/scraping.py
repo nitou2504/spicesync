@@ -4,7 +4,7 @@ import json
 import os
 from db import *
 import secrets
-
+from utils import *
 
 ######################## Extract recipe info
 
@@ -224,9 +224,7 @@ def scrape_and_update_database(connection, use_existing_links=False):
     html_content = url_request.content.decode('utf-8')
     recipes = extract_recipe_links(html_content)
 
-    # Get the directory of the current script
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    file_path = os.path.join(dir_path, 'links.txt')
+    file_path = generate_local_path('links.txt')
     existing_links = load_links_from_file(file_path)
     
     # Filter out existing links
@@ -253,7 +251,5 @@ if __name__ == "__main__":
 
     # Connect to MySQL database
     connection = connect_to_mysql(HOST, USER, PASSWORD, DATABASE)
-
     scrape_and_update_database(connection)
-
     connection.close()
