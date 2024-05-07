@@ -72,6 +72,7 @@ def get_user_profile_route(user_id):
     else:
         return jsonify({"message": "User not found"}), 404
     
+###### Recipes ######
 
 @app.route('/recipes/<string:tag>', methods=['GET'])
 def get_recipes_per_tag_route(tag):
@@ -131,48 +132,76 @@ def search_recipes_by_name_route():
         return jsonify({"message": "No recipes_list found"}), 404
 
 # Route to get user favorite recipes
-# @app.route('/user/<int:user_id>/favorites', methods=['GET'])
-# def get_user_favorites(user_id):
-#     connection = connect_to_mysql(HOST, USER, PASSWORD, DATABASE)
-#     favorites = user.get_user_favorites(connection, user_id)
-#     connection.close()
+@app.route('/users/<int:user_id>/favorite_recipes', methods=['GET'])
+def get_favorite_recipes_route(user_id):
+    batch_size = int(request.args.get('batch_size', 15))
+    offset = int(request.args.get('offset', 0))
 
-#     return jsonify({"user_id": user_id, "favorites": favorites})
+    connection = connect_to_mysql(HOST, USER, PASSWORD, DATABASE)
+    favorite_recipes = recipes.get_favorite_recipes(connection, user_id, batch_size, offset)
+    connection.close()
 
-# Route to add recipe to user favorites
-# @app.route('/user/<int:user_id>/favorites', methods=['POST'])
-# def add_to_favorites(user_id):
-#     connection = connect_to_mysql(HOST, USER, PASSWORD, DATABASE)
-#     recipe_id = request.get_json()['recipe_id']
-#     user.add_to_favorites(connection, user_id, recipe_id)
-#     connection.close()
+    if favorite_recipes:
+        return jsonify(favorite_recipes), 200
+    else:
+        return jsonify({"message": "No favorite recipes found for this user"}), 404
 
-#     return jsonify({"message": "Recipe added to favorites successfully"})
+@app.route('/users/<int:user_id>/favorite_recipes/add', methods=['POST'])
+def add_recipe_to_favorites_route(user_id):
+    recipe_id = request.args.get('recipe_id')
 
-# Route to remove recipe from user favorites
-# @app.route('/user/<int:user_id>/favorites', methods=['DELETE'])
-# def remove_from_favorites(user_id):
-#     connection = connect_to_mysql(HOST, USER, PASSWORD, DATABASE)
-#     recipe_id = request.get_json()['recipe_id']
-#     user.remove_from_favorites(connection, user_id, recipe_id)
-#     connection.close()
+    if not recipe_id:
+        return jsonify({"message": "Recipe ID is missing"}), 400
 
-#     return jsonify({"message": "Recipe removed from favorites successfully"})
+    connection = connect_to_mysql(HOST, USER, PASSWORD, DATABASE)
+    added = recipes.add_recipe_to_favorites(connection, user_id, int(recipe_id))
+    connection.close()
 
-# Route to get user read recipes
-# @app.route('/user/<int:user_id>/read', methods=['GET'])
-# def get_user_read(user_id):
-#     connection = connect_to_mysql(HOST, USER, PASSWORD, DATABASE)
-#     read = user.get_user_read(connection, user_id)
-#     connection.close()
+    if added:
+        return jsonify({"message": "Recipe added to favorites"}), 201
+    else:
+        return jsonify({"message": "Recipe is already in favorites"}), 409
 
-#     return jsonify({"user_id": user_id, "read": read})
 
-# Route to mark recipe as read
-@app.route('/recipes/<int:recipe_id>/read', methods=['POST'])
-def mark_recipe_as_read(recipe_id):
-    # Logic to mark recipe as read
-    return jsonify({'message': 'Recipe marked as read successfully'})
+@app.route('/users/<int:user_id>/favorite_recipes/remove', methods=['POST'])
+def remove_recipe_from_favorites_route(user_id):
+    recipe_id = request.args.get('recipe_id')
+
+    if not recipe_id:
+        return jsonify({"message": "Recipe ID is missing"}), 400
+
+    connection = connect_to_mysql(HOST, USER, PASSWORD, DATABASE)
+    removed = recipes.remove_recipe_from_favorites(connection, user_id, int(recipe_id))
+    connection.close()
+
+    if removed:
+        return jsonify({"message": "Recipe removed from favorites"}), 200
+    else:
+        return jsonify({"message": "Recipe not found in favorites"}), 404
+
+@app.route('/users/<int:user_id>/read_recipes', methods=['GET'])
+def get_read_recipes_route(user_id):
+    batch_size = int(request.args.get('batch_size', 15))
+    offset = int(request.args.get('offset', 0))
+
+    connection = connect_to_mysql(HOST, USER, PASSWORD, DATABASE)
+    read_recipes = recipes.get_read_recipes(connection, user_id, batch_size, offset)
+    connection.close()
+
+    if read_recipes:
+        return jsonify(read_recipes), 200
+    else:
+        return jsonify({"message": "No read recipes found for this user"}), 404
+
+@app.route('/users/<int:user_id>/read_recipes', methods=['POST'])
+def add_or_update_read_recipe_route(user_id):
+    recipe_id = request.args.get('recipe_id')
+
+    connection = connect_to_mysql(HOST, USER, PASSWORD, DATABASE)
+    recipes.add_or_update_read_recipe(connection, user_id, recipe_id)
+    connection.close()
+
+    return jsonify({"message": "Read recipe added/updated successfully"}), 200
 
 
 # Route to scrape recipes
@@ -183,8 +212,6 @@ def scrape_recipes():
     connection.close()
     # Logic to scrape recipes
     return jsonify({'message': 'Recipes scraped successfully'})
-
-
 
 
 ###### Comments ######
