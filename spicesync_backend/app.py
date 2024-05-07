@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request
 from scraping import scrape_and_update_database
 from db import connect_to_mysql
 import db_config
-import user, recipes
+import user, recipes, comments
 app = Flask(__name__)
 
 # Database connection details
@@ -216,17 +216,28 @@ def scrape_recipes():
 
 ###### Comments ######
 
-# Route to get comments on a recipe
 @app.route('/recipes/<int:recipe_id>/comments', methods=['GET'])
-def get_comments(recipe_id):
-    # Logic to retrieve comments on a recipe
-    return jsonify({'recipe_id': recipe_id, 'comments': []})
+def get_recipe_comments_route(recipe_id):
+    connection = connect_to_mysql(HOST, USER, PASSWORD, DATABASE)
+    comments_list = comments.get_recipe_comments(connection, recipe_id)
+    connection.close()
 
-# Route to make a comment on a recipe
+    if comments_list:
+        return jsonify(comments_list), 200
+    else:
+        return jsonify({"message": "No comments found for this recipe"}), 404
+
+
 @app.route('/recipes/<int:recipe_id>/comments', methods=['POST'])
-def make_comment(recipe_id):
-    # Logic to make a comment on a recipe
-    return jsonify({'message': 'Comment added successfully'})
+def add_comment_route(recipe_id):
+    user_id = int(request.json.get('user_id'))
+    comment_text = request.json.get('comment_text')
+
+    connection = connect_to_mysql(HOST, USER, PASSWORD, DATABASE)
+    comments.add_comment(connection, user_id, recipe_id, comment_text)
+    connection.close()
+
+    return jsonify({"message": "Comment added successfully"}), 201
 
 if __name__ == '__main__':
     app.run(debug=True, port=2525) # Run the Flask api on port 2525
