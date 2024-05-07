@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request
 from scraping import scrape_and_update_database
 from db import connect_to_mysql
 import db_config
-import user
+import user, recipes
 app = Flask(__name__)
 
 # Database connection details
@@ -73,24 +73,62 @@ def get_user_profile_route(user_id):
         return jsonify({"message": "User not found"}), 404
     
 
-# # Route to get recipes by category
-# @app.route('/recipes/category/<string:category>', methods=['GET'])
-# def get_recipes_by_category(category):
-#     # Logic to retrieve recipes by category
-#     return jsonify({'category': category, 'recipes': recipes})
+@app.route('/recipes/<string:tag>', methods=['GET'])
+def get_recipes_per_tag_route(tag):
+    batch_size = request.args.get('batch_size', default=15, type=int)
+    offset = request.args.get('offset', default=0, type=int)
+    connection = connect_to_mysql(HOST, USER, PASSWORD, DATABASE)
+    recipes_list = recipes.get_recipes_per_tag(connection, tag, batch_size, offset)
+    connection.close()
 
-# # Route to get latest recipes
-# @app.route('/recipes/latest', methods=['GET'])
-# def get_latest_recipes():
-#     # Logic to retrieve latest recipes
-#     return jsonify({'recipes': recipes})
+    if recipes_list:
+        return jsonify(recipes_list), 200
+    else:
+        return jsonify({"message": "No recipes found for this tag"}), 404
+    
+@app.route('/tags', methods=['GET'])
+def get_recipes_tags_route():
+    connection = connect_to_mysql(HOST, USER, PASSWORD, DATABASE)
+    tags = recipes.get_recipes_tags(connection)
+    connection.close()
 
-# # Route to search recipes by name
-# @app.route('/recipes/search', methods=['GET'])
-# def search_recipes():
-#     query = request.args.get('q')
-#     # Logic to search recipes by name
-#     return jsonify({'query': query, 'recipes': recipes})
+    if tags:
+        return jsonify(tags), 200
+    else:
+        return jsonify({"message": "No tags found"}), 404
+
+
+@app.route('/latest_recipes', methods=['GET'])
+def latest_recipes_route():
+    batch_size = request.args.get('batch_size', default=15, type=int)
+    offset = request.args.get('offset', default=0, type=int)
+
+    connection = connect_to_mysql(HOST, USER, PASSWORD, DATABASE)  
+    latest_recipes = recipes.get_latest_recipes(connection, batch_size, offset)
+    connection.close()
+
+    if latest_recipes:
+        return jsonify(latest_recipes), 200
+    else:
+        return jsonify({"message": "No recipes found"}), 404
+
+@app.route('/recipes/search', methods=['GET'])
+def search_recipes_by_name_route():
+    name = request.args.get('name')
+    batch_size = request.args.get('batch_size', default=15, type=int)
+    offset = request.args.get('offset', default=0, type=int)
+
+    if not name:
+        return jsonify({"message": "Name parameter is required"}), 400
+
+    connection = connect_to_mysql(HOST, USER, PASSWORD, DATABASE)
+    recipes_list = recipes.search_recipes_by_name(connection, name, batch_size, offset)
+    connection.close()
+
+    if recipes_list:
+        return jsonify(recipes_list), 200
+    else:
+        return jsonify({"message": "No recipes_list found"}), 404
 
 # Route to get user favorite recipes
 # @app.route('/user/<int:user_id>/favorites', methods=['GET'])
