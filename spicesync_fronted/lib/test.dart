@@ -1,36 +1,36 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '/models/recipe.dart';
+import '/models/comment.dart';
 import '/config/api.dart' as api;
 
 Future<void> main() async {
-
   var emulator = true;
   var url = '';
 
   if (emulator){
-    url = '${api.apiBaseUrlEmulator}/latest_recipes?batch_size=1';
-  // ignore: dead_code
+    url = '${api.apiBaseUrlEmulator}/recipes/1/comments'; // Assuming recipe_id is 1 for testing
   } else {
-    url = '${api.apiBaseUrl}/latest_recipes?batch_size=1';
+    url = '${api.apiBaseUrl}/recipes/1/comments'; // Assuming recipe_id is 1 for testing
   }
 
-  // Make a GET request to the latest_recipes_route
+  // Make a GET request to the get_recipe_comments_route
   final response = await http.get(Uri.parse(url));
 
   if (response.statusCode == 200) {
     // If the server returns a 200 OK response, parse the JSON.
-    var latestRecipes = jsonDecode(response.body);
-    // print(latestRecipes); // Print the list of latest recipes
+    var commentsJson = jsonDecode(response.body);
+    var comments = commentsJson.map((commentJson) => Comment.fromJson(commentJson)).toList();
 
-    var recipe = latestRecipes[0];
-    var recipeObject = Recipe.fromJson(recipe);
-    await recipeObject.fetchAndSetTags();
-    recipeObject.printRecipe();
-
-    // Close the database connection
+    // Print the details of each comment
+    for (var comment in comments) {
+      print('Comment ID: ${comment.commentId}');
+      print('Comment Text: ${comment.commentText}');
+      print('User ID: ${comment.userId}');
+      print('Recipe ID: ${comment.recipeId}');
+      print('---');
+    }
   } else {
     // If the server returns an error response, throw an exception.
-    throw Exception('Failed to load latest recipes');
+    throw Exception('Failed to load comments for the recipe');
   }
 }
