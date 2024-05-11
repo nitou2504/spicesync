@@ -102,7 +102,7 @@ def get_user_profile(connection, user_id):
     cursor = connection.cursor(dictionary=True)
 
     # Fetch user data
-    cursor.execute("SELECT * FROM users WHERE user_id = %s", (user_id,))
+    cursor.execute("SELECT user_id, email, username, phone_number FROM users WHERE user_id = %s", (user_id,))
     user_profile = cursor.fetchone()
 
     cursor.close()
