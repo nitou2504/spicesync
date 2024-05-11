@@ -1,5 +1,4 @@
 import mysql.connector
-import json
 
 
 def connect_to_mysql(host, user, password, database, port='3306'):

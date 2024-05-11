@@ -86,7 +86,18 @@ def get_recipes_per_tag_route(tag):
         return jsonify(recipes_list), 200
     else:
         return jsonify({"message": "No recipes found for this tag"}), 404
-    
+
+@app.route('/recipes/<int:recipe_id>/tags', methods=['GET'])
+def get_recipe_tags_route(recipe_id):
+    connection = connect_to_mysql(HOST, USER, PASSWORD, DATABASE)
+    tags = recipes.get_recipe_tags(connection, recipe_id)
+    connection.close()
+
+    if tags:
+        return jsonify(tags), 200
+    else:
+        return jsonify({"message": "No tags found for this recipe"}), 404
+
 @app.route('/tags', methods=['GET'])
 def get_recipes_tags_route():
     connection = connect_to_mysql(HOST, USER, PASSWORD, DATABASE)

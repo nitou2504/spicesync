@@ -18,6 +18,22 @@ def get_recipes_tags(connection):
     cursor.close()
     return tags
 
+def get_recipe_tags(connection, recipe_id):
+    cursor = connection.cursor(dictionary=True)
+
+    # Fetch all tags associated with a specific recipe
+    cursor.execute("""
+        SELECT t.tag_name 
+        FROM tags t 
+        JOIN recipe_tags rt ON t.tag_id = rt.tag_id 
+        WHERE rt.recipe_id = %s
+    """, (recipe_id,))
+    
+    tags = cursor.fetchall()
+
+    cursor.close()
+    return tags
+
 def get_latest_recipes(connection, batch_size=15, offset=0):
     cursor = connection.cursor(dictionary=True)
 
