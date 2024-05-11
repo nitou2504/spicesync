@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:mysql_client/mysql_client.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:http/http.dart' as http;
+import '/config/api.dart' as api;
 
 class Recipe {
   final int id;
@@ -82,7 +83,7 @@ class Recipe {
   }
 
   Future<List<String>> fetchRecipeTags(int recipeId) async {
-  final response = await http.get(Uri.parse('http://10.0.2.2:2525/recipes/$recipeId/tags'));
+  final response = await http.get(Uri.parse('${api.apiBaseUrlEmulator}/recipes/$recipeId/tags'));
 
   if (response.statusCode == 200) {
     // If the server returns a 200 OK response, parse the tags from the response body.

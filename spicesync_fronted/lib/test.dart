@@ -1,10 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '/models/recipe.dart';
-
-// host localhost
-const emulator_local_host = '10.0.2.2';
-const host_local_host = 'localhost';
+import '/config/api.dart' as api;
 
 Future<void> main() async {
 
@@ -12,10 +9,10 @@ Future<void> main() async {
   var url = '';
 
   if (emulator){
-    url = 'http://$emulator_local_host:2525/latest_recipes?batch_size=1';
+    url = '${api.apiBaseUrlEmulator}/latest_recipes?batch_size=1';
   // ignore: dead_code
   } else {
-    url = 'http://$host_local_host:2525/latest_recipes?batch_size=1';
+    url = '${api.apiBaseUrl}/latest_recipes?batch_size=1';
   }
 
   // Make a GET request to the latest_recipes_route
