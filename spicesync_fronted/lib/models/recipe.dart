@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:mysql_client/mysql_client.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:http/http.dart' as http;
 import '/config/api.dart' as api;
@@ -51,20 +50,7 @@ class Recipe {
     );
   }
   
-  factory Recipe.fromQueryResult(ResultSetRow row) {
-    return Recipe(
-      id: int.parse( row.colByName('recipe_id') as String),
-      name: row.colByName('name') as String,
-      prepTime: row.colByName('prep_time') as String,
-      cookTime: row.colByName('cook_time') as String,
-      servings: row.colByName('servings') as String,
-      ingredientsList: jsonDecode(row.colByName('ingredients_list') as String),
-      methodParts: jsonDecode(row.colByName('method_parts') as String),
-      imageUrl: row.colByName('image_url') as String?,
-      sourceUrl: row.colByName('source_url') as String,
-      createdAt: DateTime.parse(row.colByName('created_at') as String),
-    );
-  }
+
 
   // Methods
 
