@@ -12,34 +12,23 @@ class RecipeCard extends StatelessWidget {
     return Card(
       child: Column(
         children: [
-          // ClipRRect for rounded corners on the image
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8.0),
-            child: Image.network(
-              recipe.imageUrl!,
-              width: double.infinity,
-              height: 200,
-              fit: BoxFit.cover,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              recipe.name,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: AppColors.secondaryColor,
-              ),
-            ),
-          ),
+          
           // Scrollable list view to display recipe information
           Expanded(
             child: ListView(
+              padding: EdgeInsets.all(12.0),
               children: [
-                // Center(
-                //   child: buildPrepCookServe(context, recipe.prepTime, recipe.cookTime, recipe.servings),
-                //   ),
+                // ClipRRect for rounded corners on the image
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: Image.network(
+                    recipe.imageUrl!,
+                    width: double.infinity,
+                    height: 200,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                SizedBox(height: 10.0),
                 buildPrepCookServe(context, recipe.prepTime, recipe.cookTime, recipe.servings),
                 SizedBox(height: 10.0),
                 buildIngredientsList(context, 'Ingredients:', recipe.ingredientsList),

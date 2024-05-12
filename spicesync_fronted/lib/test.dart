@@ -38,7 +38,7 @@ class TestApp extends StatelessWidget {
       ),
       home: Scaffold(
         appBar: AppBar(
-          title: Text('Recipe Card Test'),
+          title: Text('${firstRecipe.name}'),
         ),
         body: Center(
           child: RecipeCard(recipe: firstRecipe),
