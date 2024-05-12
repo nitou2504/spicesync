@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '/models/recipe.dart'; // Adjust the import path as necessary
-import '/config/colors.dart'; // Adjust the import path as necessary
+import '/config/colors.dart';
+import '/screens/recipeCardScreen.dart'; // Adjust the import path as necessary
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -82,7 +83,18 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           itemCount: _allRecipes.length,
           itemBuilder: (context, index) {
-            return Recipe.makeRecipeCard(context, _allRecipes[index]);
+            return GestureDetector(
+              onTap: () {
+                // Navigate to a new screen and pass the recipe to it
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => RecipeCardScreen(recipe: _allRecipes[index]),
+                  ),
+                );
+              },
+              child: Recipe.makeRecipeCard(context, _allRecipes[index]),
+            );
           },
         ),
       ),
