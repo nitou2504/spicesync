@@ -7,29 +7,13 @@ Future<void> main() async {
   var emulator = true;
   var url = '';
 
-  if (emulator){
-    url = '${api.apiBaseUrlEmulator}/user_profile/1'; // Assuming user_id is 1 for testing
-  // ignore: dead_code
-  } else {
-    url = '${api.apiBaseUrl}/user_profile/1'; // Assuming user_id is 1 for testing
-  }
+// test data
+var email = 'h@s.com';
+var username = 'h';
+var phoneNumber = '1234567890';
+var password = 'password';
 
-  // Make a GET request to the get_user_profile_route
-  final response = await http.get(Uri.parse(url));
+User user = await User.register(email, username, phoneNumber, password);
 
-  if (response.statusCode == 200) {
-    // If the server returns a 200 OK response, parse the JSON.
-    var userProfileJson = jsonDecode(response.body);
-    var user = User.fromJson(userProfileJson);
-
-    // Print the details of the user
-    print('User ID: ${user.userId}');
-    print('Email: ${user.email}');
-    print('Username: ${user.username}');
-    print('Phone Number: ${user.phoneNumber}');
-    print('---');
-  } else {
-    // If the server returns an error response, throw an exception.
-    throw Exception('Failed to load user profile');
-  }
+print(user.userId);
 }

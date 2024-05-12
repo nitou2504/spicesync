@@ -56,4 +56,29 @@ class User {
       throw Exception('Failed to log in');
     }
   }
+
+  // register
+    static Future<User> register(String email, String username, String phoneNumber, String password) async {
+    final response = await http.post(
+      Uri.parse('${api.apiBaseUrlEmulator}/register'), // Use the emulator base URL from the Api class
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'email': email,
+        'username': username,
+        'phone_number': phoneNumber,
+        'password': password,
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      // Assuming the backend returns the user_id in the response body
+      var userId = jsonDecode(response.body)['user_id'];
+      return User(userId: userId, email: email, username: username, phoneNumber: phoneNumber, password: password);
+    } else {
+      throw Exception('Failed to register');
+    }
+  }
+
 }

@@ -26,7 +26,7 @@ def register_user():
     if user_ is None:
         return jsonify({"message": "User already exists"}), 400
     else:
-        return jsonify({"message": "User created successfully"}), 201
+        return jsonify({"user_id": user_['user_id']}), 201
 
     
 # Route to log in

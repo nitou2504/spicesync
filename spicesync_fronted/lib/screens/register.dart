@@ -128,9 +128,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     // Register button
                     ElevatedButton(
                       onPressed: () async {
-                        // Handle registration logic here
-                        // You can use the text from the TextFormField widgets
-                        // to create a new User object and register the user
+                        try {
+                          var email = _emailController.text;
+                          var username = _usernameController.text;
+                          var phoneNumber = _phoneNumberController.text;
+                          var password = _passwordController.text;
+                          User user = await User.register(email, username, phoneNumber, password);
+                          Navigator.pushNamed(context, Routes.home, arguments: user);
+                        } catch (e) {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text('Register Failed'),
+                                content: Text('User already exists or invalid data provided'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.of(context).pop(),
+                                    child: Text('OK'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        }
                       },
                       child: Text('Register', style: TextStyle(color: Colors.white, fontSize: 18)),
                       style: ElevatedButton.styleFrom(

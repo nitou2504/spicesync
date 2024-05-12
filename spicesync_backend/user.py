@@ -26,7 +26,11 @@ def create_user(connection, user_json):
             )
             cursor.execute(query, values)
             connection.commit()
-            print(f"User {user_json['email']} inserted successfully")
+
+            query = "SELECT user_id FROM users WHERE email = %s"
+            cursor.execute(query, (user_json['email'],))
+            user_json['user_id'] = cursor.fetchone()[0]
+            print(f"User with ID {user_json['user_id']} created successfully")
             return user_json
 
     except mysql.connector.Error as e:
