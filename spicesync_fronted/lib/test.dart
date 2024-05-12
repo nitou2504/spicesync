@@ -9,6 +9,7 @@ Future<void> main() async {
 
   if (emulator){
     url = '${api.apiBaseUrlEmulator}/user_profile/1'; // Assuming user_id is 1 for testing
+  // ignore: dead_code
   } else {
     url = '${api.apiBaseUrl}/user_profile/1'; // Assuming user_id is 1 for testing
   }
