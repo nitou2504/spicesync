@@ -3,7 +3,15 @@ import '/config/colors.dart'; // Import your color configuration
 import '/screens/routes.dart'; // Import your routes configuration
 import '/models/user.dart'; // Import the User model
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
+  @override
+  _LoginScreenState createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,6 +52,7 @@ class LoginScreen extends StatelessWidget {
                     
                     // Email field
                     TextFormField(
+                      controller: _emailController,
                       decoration: InputDecoration(
                         labelText: 'Email',
                         labelStyle: TextStyle(color: AppColors.textColor),
@@ -61,6 +70,7 @@ class LoginScreen extends StatelessWidget {
                     
                     // Password field
                     TextFormField(
+                      controller: _passwordController,
                       decoration: InputDecoration(
                         labelText: 'Password',
                         labelStyle: TextStyle(color: AppColors.textColor),
@@ -73,6 +83,7 @@ class LoginScreen extends StatelessWidget {
                           borderSide: BorderSide(color: AppColors.primaryColor),
                         ),
                       ),
+                      obscureText: true, // To hide the password
                     ),
                     SizedBox(height: 10.0),
                     
@@ -80,8 +91,8 @@ class LoginScreen extends StatelessWidget {
                     ElevatedButton(
                       onPressed: () async {
                         try {
-                          var email = 'new_email@example.com'; // Define email
-                          var password = 'new_password'; // Define password
+                          var email = _emailController.text; // Use the text from the email TextFormField
+                          var password = _passwordController.text; // Use the text from the password TextFormField
                           User user = await User.login(email, password); // Assuming email and password are defined
                           showDialog(
                             context: context,
