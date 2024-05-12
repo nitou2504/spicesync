@@ -93,25 +93,26 @@ class _LoginScreenState extends State<LoginScreen> {
                         try {
                           var email = _emailController.text; // Use the text from the email TextFormField
                           var password = _passwordController.text; // Use the text from the password TextFormField
-                          User user = await User.login(email, password); // Assuming email and password are defined
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: Text('Login Successful'),
-                                content: Text('Welcome back, ${user.username}'),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop(); // Close the dialog
-                                      Navigator.pushReplacementNamed(context, '/home'); // Navigate to the home screen
-                                    },
-                                    child: Text('OK'),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
+                          User user = await User.login(email, password);
+                          Navigator.pushReplacementNamed(context, '/home');
+                          // showDialog(
+                          //   context: context,
+                          //   builder: (BuildContext context) {
+                          //     return AlertDialog(
+                          //       title: Text('Login Successful'),
+                          //       content: Text('Welcome back, ${user.username}'),
+                          //       actions: [
+                          //         TextButton(
+                          //           onPressed: () {
+                          //             Navigator.of(context).pop(); // Close the dialog
+                          //             Navigator.pushReplacementNamed(context, '/home'); // Navigate to the home screen
+                          //           },
+                          //           child: Text('OK'),
+                          //         ),
+                          //       ],
+                          //     );
+                          //   },
+                          // );
                         } catch (e) {
                           showDialog(
                             context: context,
@@ -141,19 +142,19 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     SizedBox(height: 10.0),
                     
-                    // Or text above Sign Up button
+                    // Or text above Register button
                     Text(
                       'or',
                       style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textColor),
                     ),
                     SizedBox(height: 10.0),
                     
-                    // Sign Up button
+                    // Register button
                     ElevatedButton(
                       onPressed: () {
                         // Handle sign up logic here
                       },
-                      child: Text('Sign Up', style: TextStyle(color: Colors.white, fontSize: 18)),
+                      child: Text('Register', style: TextStyle(color: Colors.white, fontSize: 18)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.secondaryColor,
                         padding: EdgeInsets.symmetric(horizontal: 50, vertical: 20),
