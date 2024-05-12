@@ -102,7 +102,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                 content: Text('Welcome back, ${user.username}'),
                                 actions: [
                                   TextButton(
-                                    onPressed: () => Navigator.of(context).pop(),
+                                    onPressed: () {
+                                      Navigator.of(context).pop(); // Close the dialog
+                                      Navigator.pushReplacementNamed(context, '/home'); // Navigate to the home screen
+                                    },
                                     child: Text('OK'),
                                   ),
                                 ],
