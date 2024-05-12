@@ -152,7 +152,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     // Register button
                     ElevatedButton(
                       onPressed: () {
-                        // Handle sign up logic here
+                        Navigator.pushReplacementNamed(context, '/register');
                       },
                       child: Text('Register', style: TextStyle(color: Colors.white, fontSize: 18)),
                       style: ElevatedButton.styleFrom(
