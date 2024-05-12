@@ -63,7 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Home'),
+        title: Text('Latest Recipes'),
       ),
       body: NotificationListener<ScrollNotification>(
         onNotification: (ScrollNotification notification) {
