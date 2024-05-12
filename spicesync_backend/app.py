@@ -115,10 +115,11 @@ def latest_recipes_route():
     batch_size = request.args.get('batch_size', default=15, type=int)
     offset = request.args.get('offset', default=0, type=int)
 
+    print(f"Batch size: {batch_size}, Offset: {offset}")
+
     connection = connect_to_mysql(HOST, USER, PASSWORD, DATABASE)  
     latest_recipes = recipes.get_latest_recipes(connection, batch_size, offset)
     connection.close()
-
     if latest_recipes:
         return jsonify(latest_recipes), 200
     else:

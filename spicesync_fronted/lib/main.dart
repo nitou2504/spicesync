@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:spicesync_fronted_test/screens/home.dart';
 import '/screens/routes.dart';
 import '/screens/welcome.dart';
 
@@ -14,7 +15,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: WelcomeScreen(), // Set the initial route
+      home: HomeScreen(), // Set the initial route
       onGenerateRoute: Routes.generateRoute,
     );
   }

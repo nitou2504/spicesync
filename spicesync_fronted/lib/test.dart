@@ -1,19 +1,20 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import '/models/user.dart';
-import '/config/api.dart' as api;
+// Import the recipe.dart file
+import '/models/recipe.dart';
 
 Future<void> main() async {
-  var emulator = true;
-  var url = '';
 
-// test data
-var email = 'h@s.com';
-var username = 'h';
-var phoneNumber = '1234567890';
-var password = 'password';
+  // Load the latest recipes
+  List<Recipe> latestRecipes = await Recipe.loadLatestRecipes(offset: 0, batch_size: 5);
 
-User user = await User.register(email, username, phoneNumber, password);
+  // Print the name of each recipe
+  for (var recipe in latestRecipes) {
+    print(recipe.name);
+  }
 
-print(user.userId);
+  List<Recipe> recipes1 = await Recipe.loadLatestRecipes(offset: 5, batch_size: 5);
+
+  // Print the name of each recipe
+  for (var recipe in recipes1) {
+    print(recipe.name);
+  }
 }

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http_parser/http_parser.dart';
 import 'package:http/http.dart' as http;
 import '/config/api.dart' as api;
+import 'package:flutter/material.dart';
 
 class Recipe {
   final int id;
@@ -31,10 +32,6 @@ class Recipe {
   });
 
   factory Recipe.fromJson(Map jsonMap) {
-
-    print(jsonMap['created_at'].runtimeType);
-    print(jsonMap['created_at']);
-
 
     return Recipe(
       id: jsonMap['recipe_id'],
@@ -85,4 +82,46 @@ class Recipe {
     this.tags = await fetchRecipeTags(this.id);
   }
 
+  static Future<List<Recipe>> loadLatestRecipes({int offset = 0, int batch_size=15}) async {
+    final response = await http.get(Uri.parse('${api.apiBaseUrlEmulator}/latest_recipes?batch_size=$batch_size&offset=$offset'));
+
+    if (response.statusCode == 200) {
+      // If the server returns a 200 OK response, parse the JSON to get the list of recipes.
+      List<dynamic> responseBody = jsonDecode(response.body);
+      return responseBody.map((recipe) => Recipe.fromJson(recipe)).toList();
+    } else {
+      return [];
+      // If the server returns an error response, throw an exception.
+      // throw Exception('Failed to load latest recipes');
+      
+    }
+  }
+
+  // method to make a card with image and name
+  // Inside recipe.dart
+
+  static Widget makeRecipeCard(BuildContext context, Recipe recipe) {
+    return Card(
+      child: Column(
+        children: [
+          Image.network(
+            recipe.imageUrl!,
+            width: double.infinity,
+            height: 200,
+            fit: BoxFit.cover,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              recipe.name,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

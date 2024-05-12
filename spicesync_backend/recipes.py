@@ -2,7 +2,7 @@ def get_recipes_per_tag(connection, tag, batch_size=15, offset=0):
     cursor = connection.cursor(dictionary=True)
 
     # Fetch recipes for a specific tag with pagination
-    cursor.execute("SELECT r.* FROM recipes r JOIN recipe_tags rt ON r.recipe_id = rt.recipe_id JOIN tags t ON rt.tag_id = t.tag_id WHERE t.tag_name = %s LIMIT %s OFFSET %s", (tag, batch_size, offset))
+    cursor.execute("SELECT r.* FROM recipes r JOIN recipe_tags rt ON r.recipe_id = rt.recipe_id JOIN tags t ON rt.tag_id = t.tag_id WHERE t.tag_name = %s and r.image_url is not null LIMIT %s OFFSET %s", (tag, batch_size, offset))
     recipes = cursor.fetchall()
 
     cursor.close()
@@ -38,7 +38,7 @@ def get_latest_recipes(connection, batch_size=15, offset=0):
     cursor = connection.cursor(dictionary=True)
 
     # Fetch latest recipes with pagination
-    cursor.execute("SELECT * FROM recipes ORDER BY created_at DESC LIMIT %s OFFSET %s", (batch_size, offset))
+    cursor.execute("SELECT * FROM recipes where recipes.image_url is not null ORDER BY created_at DESC LIMIT %s OFFSET %s", (batch_size, offset))
     latest_recipes = cursor.fetchall()
 
     cursor.close()
