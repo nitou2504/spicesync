@@ -25,7 +25,7 @@ class WelcomeScreen extends StatelessWidget {
               child: Container(
                 padding: EdgeInsets.all(5.0),
                 child: Card(
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withOpacity(0.95),
                   child: Column(
                     mainAxisSize: MainAxisSize.min, // Content doesn't overflow
                     children: [
