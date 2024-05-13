@@ -24,14 +24,15 @@ class _RecipeCardState extends State<RecipeCard> {
             child: ListView(
               padding: EdgeInsets.all(12.0),
               children: [
-                ClipRRect(
+                if (widget.recipe.imageUrl!=null)
+                  ClipRRect(
                   borderRadius: BorderRadius.circular(8.0),
                   child: Image.network(
                     widget.recipe.imageUrl!,
                     width: double.infinity,
                     height: 200,
                     fit: BoxFit.cover,
-                  ),
+                  ),                
                 ),
                 SizedBox(height: 10.0),
                 buildPrepCookServe(context, widget.recipe.prepTime, widget.recipe.cookTime, widget.recipe.servings),

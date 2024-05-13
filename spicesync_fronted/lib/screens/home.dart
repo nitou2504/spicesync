@@ -4,6 +4,85 @@ import '/config/colors.dart'; // Adjust the import path as necessary
 import '/screens/recipeCardScreen.dart'; // Adjust the import path as necessary
 import '/models/tags.dart'; // Adjust the import path as necessary
 
+class SearchScreen extends StatefulWidget {
+  @override
+  _SearchScreenState createState() => _SearchScreenState();
+}
+
+class _SearchScreenState extends State<SearchScreen> {
+  TextEditingController _searchController = TextEditingController();
+  List<Recipe> _searchResults = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(_performSearch);
+  }
+
+  @override
+  void dispose() {
+    _searchController.removeListener(_performSearch);
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _performSearch() {
+    setState(() {
+      _searchResults = []; // Clear previous results
+    });
+    _searchRecipes(_searchController.text);
+  }
+
+  void _searchRecipes(String query) async {
+    List<Recipe> results = await Recipe.loadRecipesByName(query);
+    setState(() {
+      _searchResults = results;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Search Recipes'),
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                labelText: 'Search',
+                suffixIcon: Icon(Icons.search),
+              ),
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: _searchResults.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(_searchResults[index].name),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => RecipeCardScreen(recipe: _searchResults[index]),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -178,7 +257,8 @@ class _HomeScreenState extends State<HomeScreen> {
   );
 
       case NavigationItem.search:
-        return Center(child: Text('Search Screen'));
+  return SearchScreen();
+
       case NavigationItem.favorites:
         return Center(child: Text('Favorites Screen'));
       case NavigationItem.user:

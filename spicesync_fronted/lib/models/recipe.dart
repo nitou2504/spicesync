@@ -113,8 +113,22 @@ class Recipe {
     }
   }
 
+  // method to load recipes by name
+  static Future<List<Recipe>> loadRecipesByName(String name) async {
+    final response = await http.get(Uri.parse('${api.apiBaseUrlEmulator}/recipes/search?name=$name'));
+
+    if (response.statusCode == 200) {
+      // If the server returns a 200 OK response, parse the JSON data.
+      List<dynamic> responseBody = jsonDecode(response.body);
+      return responseBody.map((recipe) => Recipe.fromJson(recipe)).toList();
+    } else {
+      return [];
+      // If the server returns an error response, throw an exception.
+      throw Exception('Failed to load recipes by name');
+    }
+  }
+
   // method to make a card with image and name
-  // Inside recipe.dart
 
   static Widget makeRecipeCard(BuildContext context, Recipe recipe) {
     return Card(
