@@ -81,4 +81,36 @@ class User {
     }
   }
 
+  //method to add user favorite recipe
+  static Future<bool> addFavoriteRecipe(int userId, int recipeId) async {
+    final response = await http.post(
+      Uri.parse('${api.apiBaseUrlEmulator}/users/$userId/favorite_recipes/add?recipe_id=$recipeId'));
+
+    // return true if the recipe was added successfully
+    if (response.statusCode == 201) {
+      return true;
+    }
+    // return true if the recipe was already added
+    if (response.statusCode == 409) {
+      return true;
+    }
+
+    if (response.statusCode == 400) {
+      throw Exception('Failed to add favorite recipe');
+    }
+
+    // Add a return statement at the end to fix the issue
+    return false;
+  }
+
+  //method to remove user favorite recipe
+  static Future<void> removeFavoriteRecipe(int userId, int recipeId) async {
+    final response = await http.post(
+      Uri.parse('${api.apiBaseUrlEmulator}/users/$userId/favorite_recipes/remove?recipe_id=$recipeId'));
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to remove favorite recipe');
+    }
+  }
+
 }

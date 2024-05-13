@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '/models/recipe.dart';
 import '/config/colors.dart';
+import '/models/user.dart';
 
 class RecipeCard extends StatefulWidget {
   final Recipe recipe;
@@ -78,6 +79,22 @@ class _RecipeCardState extends State<RecipeCard> {
             ],
           ),
         ),
+        Expanded(
+        child: IconButton(
+              icon: Icon(Icons.favorite_border),
+              onPressed: () async {
+                // Assuming you have a way to get the user ID and the recipe ID
+                int userId =13; // Replace with the actual user ID
+                int recipeId = widget.recipe.id; // Assuming the recipe ID is accessible
+                if (await User.addFavoriteRecipe(userId, recipeId)) {
+                  // Recipe added to favorites, color the icon
+
+                } else {
+                  // Recipe removed from favorites
+                }
+              },
+            ),
+        )
       ],
     );
   }

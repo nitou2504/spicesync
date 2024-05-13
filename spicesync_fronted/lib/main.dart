@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
           bodyText2: TextStyle(fontSize: 16.0, color: AppColors.textColor),
         )
       ),
-      home: HomeScreen(), // Set the initial route
+      home: WelcomeScreen(), // Set the initial route
       onGenerateRoute: Routes.generateRoute,
     );
   }

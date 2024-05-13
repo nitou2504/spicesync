@@ -260,7 +260,40 @@ class _HomeScreenState extends State<HomeScreen> {
   return SearchScreen();
 
       case NavigationItem.favorites:
-        return Center(child: Text('Favorites Screen'));
+  return FutureBuilder<List<Recipe>>(
+    future: Recipe.loadFavoriteRecipes(13), // Replace userID with the actual user ID
+    builder: (BuildContext context, AsyncSnapshot<List<Recipe>> snapshot) {
+      if (snapshot.hasData) {
+        return GridView.builder(
+          padding: const EdgeInsets.all(8.0),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 8.0,
+            mainAxisSpacing: 8.0,
+            childAspectRatio: 1 / 1.5,
+          ),
+          itemCount: snapshot.data!.length,
+          itemBuilder: (context, index) {
+            return GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => RecipeCardScreen(recipe: snapshot.data![index]),
+                  ),
+                );
+              },
+              child: Recipe.makeRecipeCard(context, snapshot.data![index]),
+            );
+          },
+        );
+      } else if (snapshot.hasError) {
+        return Center(child: Text('Error: ${snapshot.error}'));
+      }
+      // By default, show a loading spinner.
+      return Center(child: CircularProgressIndicator());
+    },
+  );
       case NavigationItem.user:
         return Center(child: Text('User Screen'));
       default:

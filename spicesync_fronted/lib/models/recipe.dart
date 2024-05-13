@@ -128,18 +128,36 @@ class Recipe {
     }
   }
 
+  // method to load user favorite recipes
+  static Future<List<Recipe>> loadFavoriteRecipes(int userID) async {
+    final response = await http.get(Uri.parse('${api.apiBaseUrlEmulator}/users/$userID/favorite_recipes'));
+
+    if (response.statusCode == 200) {
+      // If the server returns a 200 OK response, parse the JSON data.
+      List<dynamic> responseBody = jsonDecode(response.body);
+      return responseBody.map((recipe) => Recipe.fromJson(recipe)).toList();
+    } else {
+      return [];
+      // If the server returns an error response, throw an exception.
+      throw Exception('Failed to load favorite recipes');
+    }
+  }
+
+
+
   // method to make a card with image and name
 
   static Widget makeRecipeCard(BuildContext context, Recipe recipe) {
     return Card(
       child: Column(
         children: [
-          Image.network(
-            recipe.imageUrl!,
-            width: double.infinity,
-            height: 200,
-            fit: BoxFit.cover,
-          ),
+          if (recipe.imageUrl != null)
+            Image.network(
+              recipe.imageUrl!,
+              width: double.infinity,
+              height: 200,
+              fit: BoxFit.cover,
+            ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
