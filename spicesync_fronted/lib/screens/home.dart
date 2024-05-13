@@ -114,8 +114,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           // bottomNavigationBar: _buildBottomNavigationBar(),
   );
+  
       case NavigationItem.categories:
-  case NavigationItem.categories:
   return FutureBuilder<List<String>>(
     future: Tags.getTagNames(),
     builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
@@ -136,7 +136,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     MaterialPageRoute(
                       builder: (context) => Scaffold(
                         appBar: AppBar(
-                          title: Text('${snapshot.data![index]} Recipes'),
+                          title: Text('Recipes by ${snapshot.data![index]}'),
                         ),
                         body: GridView.builder(
                           padding: const EdgeInsets.all(8.0),
@@ -148,7 +148,17 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           itemCount: recipes.length,
                           itemBuilder: (context, index) {
-                            return Recipe.makeRecipeCard(context, recipes[index]);
+                            return GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => RecipeCardScreen(recipe: recipes[index]),
+                                  ),
+                                );
+                              },
+                              child: Recipe.makeRecipeCard(context, recipes[index]),
+                            );
                           },
                         ),
                       ),
@@ -165,7 +175,8 @@ class _HomeScreenState extends State<HomeScreen> {
       // By default, show a loading spinner.
       return Center(child: CircularProgressIndicator());
     },
-  );  
+  );
+
       case NavigationItem.search:
         return Center(child: Text('Search Screen'));
       case NavigationItem.favorites:
