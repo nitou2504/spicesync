@@ -97,6 +97,22 @@ class Recipe {
     }
   }
 
+
+
+  static Future<List<Recipe>> loadRecipesPerTag(String tag, {int offset = 0, int batch_size=15}) async {
+    final response = await http.get(Uri.parse('${api.apiBaseUrlEmulator}/recipes/$tag'));
+
+    if (response.statusCode == 200) {
+      // If the server returns a 200 OK response, parse the JSON data.
+      List<dynamic> responseBody = jsonDecode(response.body);
+      return responseBody.map((recipe) => Recipe.fromJson(recipe)).toList();
+    } else {
+      return [];
+      // If the server returns an error response, throw an exception.
+      throw Exception('Failed to load recipes per tag');
+    }
+  }
+
   // method to make a card with image and name
   // Inside recipe.dart
 

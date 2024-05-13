@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '/models/recipe.dart'; // Adjust the import path as necessary
-import '/config/colors.dart';
+import '/config/colors.dart'; // Adjust the import path as necessary
 import '/screens/recipeCardScreen.dart'; // Adjust the import path as necessary
+import '/models/tags.dart'; // Adjust the import path as necessary
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -15,6 +16,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int _batchSize = 6;
   List<Recipe> _allRecipes = [];
   int _currentIndex = 0; // To keep track of the current index of the BottomNavigationBar
+  NavigationItem _currentScreen = NavigationItem.home;
 
   @override
   void initState() {
@@ -63,73 +65,151 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Latest Recipes'),
-      ),
-      body: NotificationListener<ScrollNotification>(
-        onNotification: (ScrollNotification notification) {
-          if (notification is ScrollEndNotification) {
-            _loadRecipes();
-          }
-          return true;
-        },
-        child: GridView.builder(
-          padding: const EdgeInsets.all(8.0), // Optional: Add padding around the grid
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2, // Number of columns
-            crossAxisSpacing: 8.0, // Space between columns
-            mainAxisSpacing: 8.0, // Space between rows
-            childAspectRatio: 1 / 1.5, // Aspect ratio of the grid items
+      // appBar: AppBar(
+      //   title: Text('Latest Recipes'),
+      // ),
+      body: _buildCurrentScreen(),
+      bottomNavigationBar: _buildBottomNavigationBar(),
+    );
+  }
+
+  Widget _buildCurrentScreen() {
+    switch (_currentScreen) {
+      case NavigationItem.home:
+        return Scaffold(
+          appBar: AppBar(
+            title: Text('Latest Recipes'),
           ),
-          itemCount: _allRecipes.length,
-          itemBuilder: (context, index) {
-            return GestureDetector(
-              onTap: () {
-                // Navigate to a new screen and pass the recipe to it
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => RecipeCardScreen(recipe: _allRecipes[index]),
-                  ),
+          body: NotificationListener<ScrollNotification>(
+            onNotification: (ScrollNotification notification) {
+              if (notification is ScrollEndNotification) {
+                _loadRecipes();
+                return true;
+              }
+              return false;
+            },
+            child: GridView.builder(
+              padding: const EdgeInsets.all(8.0),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 8.0,
+                mainAxisSpacing: 8.0,
+                childAspectRatio: 1 / 1.5,
+              ),
+              itemCount: _allRecipes.length,
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => RecipeCardScreen(recipe: _allRecipes[index]),
+                      ),
+                    );
+                  },
+                  child: Recipe.makeRecipeCard(context, _allRecipes[index]),
                 );
               },
-              child: Recipe.makeRecipeCard(context, _allRecipes[index]),
-            );
-          },
-        ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home, color: AppColors.textColor), // Set icon color
-            label: 'Home',
+            ),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.category, color: AppColors.textColor), // Set icon color
-            label: 'Categories',
+          // bottomNavigationBar: _buildBottomNavigationBar(),
+  );
+      case NavigationItem.categories:
+  case NavigationItem.categories:
+  return FutureBuilder<List<String>>(
+    future: Tags.getTagNames(),
+    builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
+      if (snapshot.hasData) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text('Categories'),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search, color: AppColors.textColor), // Set icon color
-            label: 'Search',
+          body: ListView.builder(
+            itemCount: snapshot.data!.length,
+            itemBuilder: (context, index) {
+              return ListTile(
+                title: Text(snapshot.data![index]),
+                onTap: () async {
+                  List<Recipe> recipes = await Recipe.loadRecipesPerTag(snapshot.data![index]);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Scaffold(
+                        appBar: AppBar(
+                          title: Text('${snapshot.data![index]} Recipes'),
+                        ),
+                        body: GridView.builder(
+                          padding: const EdgeInsets.all(8.0),
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 8.0,
+                            mainAxisSpacing: 8.0,
+                            childAspectRatio: 1 / 1.5,
+                          ),
+                          itemCount: recipes.length,
+                          itemBuilder: (context, index) {
+                            return Recipe.makeRecipeCard(context, recipes[index]);
+                          },
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite, color: AppColors.textColor), // Set icon color
-            label: 'Favorites',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person, color: AppColors.textColor), // Set icon color
-            label: 'User',
-          ),
-        ],
+        );
+      } else if (snapshot.hasError) {
+        return Center(child: Text('Error: ${snapshot.error}'));
+      }
+      // By default, show a loading spinner.
+      return Center(child: CircularProgressIndicator());
+    },
+  );  
+      case NavigationItem.search:
+        return Center(child: Text('Search Screen'));
+      case NavigationItem.favorites:
+        return Center(child: Text('Favorites Screen'));
+      case NavigationItem.user:
+        return Center(child: Text('User Screen'));
+      default:
+        return Center(child: Text('Home Screen'));
+    }
+  }
 
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-          // Handle navigation based on the index
-        },
-      ),
+  Widget _buildBottomNavigationBar() {
+    return BottomNavigationBar(
+      selectedItemColor: AppColors.primaryColor,
+      unselectedItemColor: Colors.grey,
+      currentIndex: _currentIndex,
+      onTap: (index) {
+        setState(() {
+          _currentIndex = index;
+          _currentScreen = NavigationItem.values[index];
+        });
+      },
+      items: const <BottomNavigationBarItem>[
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home),
+          label: 'Home',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.category),
+          label: 'Categories',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.search),
+          label: 'Search',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.favorite),
+          label: 'Favorites',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.person),
+          label: 'User',
+        ),
+      ],
     );
   }
 
@@ -139,3 +219,5 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 }
+
+enum NavigationItem { home, categories, search, favorites, user }
